@@ -1,0 +1,171 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:audioplayers/audioplayers.dart';
+
+void main() {
+  runApp(ReminderApp());
+}
+
+class ReminderApp extends StatefulWidget {
+  @override
+  _ReminderAppState createState() => _ReminderAppState();
+}
+
+class _ReminderAppState extends State<ReminderApp> {
+  String _selectedDay = '';
+  TimeOfDay _selectedTime = TimeOfDay.now();
+  String _selectedActivity = '';
+  List<Reminder> _reminders = [];
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Reminder App',
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Reminder App'),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              _buildDayDropdown(),
+              _buildTimePicker(),
+              _buildActivityDropdown(),
+              _buildAddReminderButton(),
+              _buildReminderList(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDayDropdown() {
+    return DropdownButtonFormField(
+      decoration: InputDecoration(
+        labelText: 'Select Day',
+        border: OutlineInputBorder(),
+      ),
+      items: [
+        DropdownMenuItem(child: Text('Monday'), value: 'Monday'),
+        DropdownMenuItem(child: Text('Tuesday'), value: 'Tuesday'),
+        DropdownMenuItem(child: Text('Wednesday'), value: 'Wednesday'),
+        DropdownMenuItem(child: Text('Thursday'), value: 'Thursday'),
+        DropdownMenuItem(child: Text('Friday'), value: 'Friday'),
+        DropdownMenuItem(child: Text('Saturday'), value: 'Saturday'),
+        DropdownMenuItem(child: Text('Sunday'), value: 'Sunday'),
+      ],
+      onChanged: (value) {
+        setState(() {
+          _selectedDay = value;
+        });
+      },
+    );
+  }
+
+  Widget _buildTimePicker() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16.0),
+      child: TimePicker(
+        initialTime: _selectedTime,
+        onTimeChanged: (time) {
+          setState(() {
+            _selectedTime = time;
+          });
+        },
+      ),
+    );
+  }
+
+  Widget _buildActivityDropdown() {
+    return DropdownButtonFormField(
+      decoration: InputDecoration(
+        labelText: 'Select Activity',
+        border: OutlineInputBorder(),
+      ),
+      items: [
+        DropdownMenuItem(child: Text('Wake up'), value: 'Wake up'),
+        DropdownMenuItem(child: Text('Go to gym'), value: 'Go to gym'),
+        DropdownMenuItem(child: Text('Breakfast'), value: 'Breakfast'),
+        DropdownMenuItem(child: Text('Meetings'), value: 'Meetings'),
+        DropdownMenuItem(child: Text('Lunch'), value: 'Lunch'),
+        DropdownMenuItem(child: Text('Quick nap'), value: 'Quick nap'),
+        DropdownMenuItem(child: Text('Go to library'), value: 'Go to library'),
+        DropdownMenuItem(child: Text('Dinner'), value: 'Dinner'),
+        DropdownMenuItem(child: Text('Go to sleep'), value: 'Go to sleep'),
+      ],
+      onChanged: (value) {
+        setState(() {
+          _selectedActivity = value;
+        });
+      },
+    );
+  }
+
+  Widget _buildAddReminderButton() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16.0),
+      child: ElevatedButton(
+        onPressed: () {
+          setState(() {
+            _reminders.add(Reminder(
+              day: _selectedDay,
+              time: _selectedTime,
+              activity: _selectedActivity,
+            ));
+          });
+        },
+        child: Text('Add Reminder'),
+      ),
+    );
+  }
+
+  Widget _buildReminderList() {
+    return Expanded(
+      child: ListView.builder(
+        itemCount: _reminders.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text('${_reminders[index].day} - ${_reminders[index].time.format(context)}'),
+            subtitle: Text(_reminders[index].activity),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class Reminder {
+  String day;
+  TimeOfDay time;
+  String activity;
+
+  Reminder({this.day, this.time, this.activity});
+}
+
+class TimePicker extends StatefulWidget {
+  final TimeOfDay initialTime;
+  final Function onTimeChanged;
+
+  TimePicker({this.initialTime, this.onTimeChanged});
+
+  @override
+  _TimePickerState createState() => _TimePickerState();
+}
+
+class _TimePickerState extends State<TimePicker> {
+  TimeOfDay _selectedTime;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTime = widget.initialTime;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        final TimeOfDay picked = await showTimePicker(
+          context: context,
